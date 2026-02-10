@@ -942,11 +942,35 @@
         // Funciones de Login Social
         // Inicialización
         function init() {
+            // Crear usuario admin si no existe
+            createAdminUser();
+            
             // Verificar si hay sesión activa
             const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 showMainScreen();
+            }
+        }
+
+        function createAdminUser() {
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            // Verificar si ya existe el admin
+            const adminExists = users.find(u => u.username === 'admin');
+            
+            if (!adminExists) {
+                // Crear usuario admin
+                const adminUser = {
+                    username: 'admin',
+                    email: 'admin@pmptest.com',
+                    password: 'Admin2025!PMP',
+                    isAdmin: true,
+                    testHistory: []
+                };
+                
+                users.push(adminUser);
+                localStorage.setItem('users', JSON.stringify(users));
             }
         }
 
@@ -1533,6 +1557,348 @@
 
         function backToHistory() {
             showHistory();
+        }
+
+        // Funciones de administración
+        function showAdminPanel() {
+            if (!currentUser.isAdmin) {
+                alert('Acceso denegado');
+                return;
+            }
+            
+            showScreen('adminScreen');
+            loadAdminMetrics();
+            showAdminTab('users');
+        }
+
+        function loadAdminMetrics() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const normalUsers = users.filter(u => !u.isAdmin);
+            
+            // Calcular métricas
+            const totalUsers = normalUsers.length;
+            const usersWithTests = normalUsers.filter(u => u.testHistory && u.testHistory.length > 0).length;
+            const totalTests = normalUsers.reduce((sum, u) => sum + (u.testHistory ? u.testHistory.length : 0), 0);
+            
+            // Calcular promedio de puntuación
+            let totalScore = 0;
+            let scoreCount = 0;
+            normalUsers.forEach(u => {
+                if (u.testHistory) {
+                    u.testHistory.forEach(test => {
+                        totalScore += parseFloat(test.score);
+                        scoreCount++;
+                    });
+                }
+            });
+            const avgScore = scoreCount > 0 ? (totalScore / scoreCount).toFixed(1) : 0;
+
+            // Usuarios activos (con tests en últimos 7 días)
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            const activeUsers = normalUsers.filter(u => {
+                if (!u.testHistory || u.testHistory.length === 0) return false;
+                const lastTest = new Date(u.testHistory[u.testHistory.length - 1].date);
+                return lastTest >= sevenDaysAgo;
+            }).length;
+
+            const metricsHTML = `
+                <div class="metric-card">
+                    <h3>Total Usuarios</h3>
+                    <div class="value">${totalUsers}</div>
+                </div>
+                <div class="metric-card green">
+                    <h3>Usuarios Activos (7d)</h3>
+                    <div class="value">${activeUsers}</div>
+                </div>
+                <div class="metric-card orange">
+                    <h3>Tests Realizados</h3>
+                    <div class="value">${totalTests}</div>
+                </div>
+                <div class="metric-card purple">
+                    <h3>Puntuación Media</h3>
+                    <div class="value">${avgScore}%</div>
+                </div>
+            `;
+
+            document.getElementById('adminMetrics').innerHTML = metricsHTML;
+        }
+
+        let currentAdminTab = 'users';
+
+        function showAdminTab(tab) {
+            currentAdminTab = tab;
+            
+            // Actualizar botones
+            document.getElementById('tabUsers').className = tab === 'users' ? 'btn' : 'btn btn-secondary';
+            document.getElementById('tabActivity').className = tab === 'activity' ? 'btn' : 'btn btn-secondary';
+            document.getElementById('tabStats').className = tab === 'stats' ? 'btn' : 'btn btn-secondary';
+
+            // Mostrar contenido
+            if (tab === 'users') {
+                showUsersTab();
+            } else if (tab === 'activity') {
+                showActivityTab();
+            } else if (tab === 'stats') {
+                showStatsTab();
+            }
+        }
+
+        function showUsersTab() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const normalUsers = users.filter(u => !u.isAdmin);
+
+            if (normalUsers.length === 0) {
+                document.getElementById('adminContent').innerHTML = `
+                    <div class="result-card">
+                        <p>No hay usuarios registrados todavía.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Tests</th>
+                            <th>Último Test</th>
+                            <th>Estado</th>
+                            <th>Promedio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            normalUsers.forEach(user => {
+                const testCount = user.testHistory ? user.testHistory.length : 0;
+                let lastTestDate = '-';
+                let isActive = false;
+                let avgScore = '-';
+
+                if (user.testHistory && user.testHistory.length > 0) {
+                    const lastTest = user.testHistory[user.testHistory.length - 1];
+                    lastTestDate = new Date(lastTest.date).toLocaleDateString('es-ES');
+                    
+                    // Verificar si está activo (test en últimos 7 días)
+                    const sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                    isActive = new Date(lastTest.date) >= sevenDaysAgo;
+
+                    // Calcular promedio
+                    const total = user.testHistory.reduce((sum, t) => sum + parseFloat(t.score), 0);
+                    avgScore = (total / user.testHistory.length).toFixed(1) + '%';
+                }
+
+                const statusBadge = isActive ? 
+                    '<span class="status-badge status-active">Activo</span>' : 
+                    '<span class="status-badge status-inactive">Inactivo</span>';
+
+                html += `
+                    <tr>
+                        <td><strong>${user.username}</strong></td>
+                        <td>${user.email}</td>
+                        <td>${testCount}</td>
+                        <td>${lastTestDate}</td>
+                        <td>${statusBadge}</td>
+                        <td>${avgScore}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('adminContent').innerHTML = html;
+        }
+
+        function showActivityTab() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const normalUsers = users.filter(u => !u.isAdmin);
+
+            // Recopilar todos los tests con información del usuario
+            const allTests = [];
+            normalUsers.forEach(user => {
+                if (user.testHistory) {
+                    user.testHistory.forEach(test => {
+                        allTests.push({
+                            username: user.username,
+                            date: test.date,
+                            score: test.score,
+                            correct: test.correct,
+                            incorrect: test.incorrect
+                        });
+                    });
+                }
+            });
+
+            // Ordenar por fecha (más reciente primero)
+            allTests.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (allTests.length === 0) {
+                document.getElementById('adminContent').innerHTML = `
+                    <div class="result-card">
+                        <p>No hay actividad todavía.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Mostrar últimos 20 tests
+            const recentTests = allTests.slice(0, 20);
+
+            let html = `
+                <h3>Actividad Reciente (últimos 20 tests)</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Fecha</th>
+                            <th>Puntuación</th>
+                            <th>Correctas</th>
+                            <th>Incorrectas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            recentTests.forEach(test => {
+                const date = new Date(test.date).toLocaleString('es-ES');
+                let scoreColor = '#dc3545';
+                
+                if (test.score >= 80) {
+                    scoreColor = '#28a745';
+                } else if (test.score >= 60) {
+                    scoreColor = '#ffc107';
+                }
+
+                html += `
+                    <tr>
+                        <td><strong>${test.username}</strong></td>
+                        <td>${date}</td>
+                        <td style="color: ${scoreColor}; font-weight: bold;">${test.score}%</td>
+                        <td>${test.correct}/20</td>
+                        <td>${test.incorrect}/20</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('adminContent').innerHTML = html;
+        }
+
+        function showStatsTab() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const normalUsers = users.filter(u => !u.isAdmin);
+
+            // Estadísticas de puntuaciones
+            const scoreRanges = {
+                '0-39%': 0,
+                '40-59%': 0,
+                '60-79%': 0,
+                '80-100%': 0
+            };
+
+            normalUsers.forEach(user => {
+                if (user.testHistory) {
+                    user.testHistory.forEach(test => {
+                        const score = parseFloat(test.score);
+                        if (score < 40) scoreRanges['0-39%']++;
+                        else if (score < 60) scoreRanges['40-59%']++;
+                        else if (score < 80) scoreRanges['60-79%']++;
+                        else scoreRanges['80-100%']++;
+                    });
+                }
+            });
+
+            const totalTests = Object.values(scoreRanges).reduce((a, b) => a + b, 0);
+
+            let html = `
+                <h3>Distribución de Puntuaciones</h3>
+                <div style="margin-top: 20px;">
+            `;
+
+            Object.entries(scoreRanges).forEach(([range, count]) => {
+                const percentage = totalTests > 0 ? (count / totalTests * 100).toFixed(1) : 0;
+                html += `
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span><strong>${range}</strong></span>
+                            <span>${count} tests (${percentage}%)</span>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="chart-fill" style="width: ${percentage}%;">
+                                ${percentage > 10 ? percentage + '%' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            // Top usuarios
+            const userStats = normalUsers.map(user => {
+                if (!user.testHistory || user.testHistory.length === 0) return null;
+                
+                const total = user.testHistory.reduce((sum, t) => sum + parseFloat(t.score), 0);
+                const avg = (total / user.testHistory.length).toFixed(1);
+                
+                return {
+                    username: user.username,
+                    avgScore: parseFloat(avg),
+                    testCount: user.testHistory.length
+                };
+            }).filter(u => u !== null);
+
+            userStats.sort((a, b) => b.avgScore - a.avgScore);
+            const topUsers = userStats.slice(0, 10);
+
+            if (topUsers.length > 0) {
+                html += `
+                    <h3 style="margin-top: 40px;">Top 10 Usuarios por Promedio</h3>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Usuario</th>
+                                <th>Promedio</th>
+                                <th>Tests</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                topUsers.forEach((user, index) => {
+                    let scoreColor = '#dc3545';
+                    if (user.avgScore >= 80) scoreColor = '#28a745';
+                    else if (user.avgScore >= 60) scoreColor = '#ffc107';
+
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${user.username}</strong></td>
+                            <td style="color: ${scoreColor}; font-weight: bold;">${user.avgScore}%</td>
+                            <td>${user.testCount}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            document.getElementById('adminContent').innerHTML = html;
         }
 
         function exportToPDF() {
