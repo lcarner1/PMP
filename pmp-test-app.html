@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMP Test App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #fafafa;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #1a1a1a;
+        }
+
+        .container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            border: 1px solid #e8e8e8;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        h2 {
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.2s;
+            background: #fafafa;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            background: white;
+        }
+
+        .btn {
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background: #000;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1a1a1a;
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #fafafa;
+            border-color: #1a1a1a;
+        }
+
+        .btn-success {
+            background: #0066ff;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #0052cc;
+        }
+
+        .question-container {
+            background: #fafafa;
+            padding: 24px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            border: 1px solid #e8e8e8;
+        }
+
+        .question-number {
+            color: #666;
+            font-weight: 500;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .question-text {
+            color: #1a1a1a;
+            font-size: 1.05em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .answer-option {
+            background: white;
+            padding: 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .answer-option:hover {
+            border-color: #1a1a1a;
+            background: #fafafa;
+        }
+
+        .answer-option.selected {
+            border-color: #1a1a1a;
+            background: #f5f5f5;
+        }
+
+        .answer-option.correct {
+            border-color: #00c853;
+            background: #e8f5e9;
+        }
+
+        .answer-option.incorrect {
+            border-color: #ff1744;
+            background: #ffebee;
+        }
+
+        .answer-option input[type="radio"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #1a1a1a;
+        }
+
+        .answer-option label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .progress-bar {
+            background: #e8e8e8;
+            height: 4px;
+            border-radius: 2px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: #1a1a1a;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .result-card {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 3px solid #1a1a1a;
+        }
+
+        .result-score {
+            font-size: 3em;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-align: center;
+            margin: 20px 0;
+            letter-spacing: -1px;
+        }
+
+        .explanation {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 3px solid #ffc107;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .explanation strong {
+            color: #1a1a1a;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e8e8e8;
+            font-size: 14px;
+        }
+
+        .history-table th {
+            background: #fafafa;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .history-table tr:hover {
+            background: #fafafa;
+        }
+
+        .history-table td:last-child {
+            text-align: center;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+            gap: 10px;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border: 1px solid #ef9a9a;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border: 1px solid #a5d6a7;
+            font-size: 14px;
+        }
+
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .user-info {
+            color: #666;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .review-answer {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e8e8e8;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .btn, .header-nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Pantalla de Login -->
+        <div id="loginScreen" class="screen active">
+            <h1>PMP Test</h1>
+            <div id="loginMessage"></div>
+            
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" placeholder="usuario">
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
+            <button class="btn" onclick="login()">Iniciar Sesión</button>
+            <button class="btn btn-secondary" onclick="showRegister()">Registrarse</button>
+            <button class="btn btn-secondary" onclick="showRecovery()">¿Olvidaste tu contraseña?</button>
+        </div>
+
+        <!-- Pantalla de Registro -->
+        <div id="registerScreen" class="screen">
+            <h1>Crear cuenta</h1>
+            <div id="registerMessage"></div>
+            <div class="form-group">
+                <label for="regUsername">Usuario</label>
+                <input type="text" id="regUsername" placeholder="usuario">
+            </div>
+            <div class="form-group">
+                <label for="regEmail">Email</label>
+                <input type="email" id="regEmail" placeholder="email@ejemplo.com">
+            </div>
+            <div class="form-group">
+                <label for="regPassword">Contraseña</label>
+                <input type="password" id="regPassword" placeholder="••••••••">
+            </div>
+            <button class="btn" onclick="register()">Registrarse</button>
+            <button class="btn btn-secondary" onclick="showLogin()">Volver al Login</button>
+        </div>
+
+        <!-- Pantalla de Recuperación de Contraseña -->
+        <div id="recoveryScreen" class="screen">
+            <h1>Recuperar Contraseña</h1>
+            <div id="recoveryMessage"></div>
+            <div class="form-group">
+                <label for="recoveryUsername">Usuario</label>
+                <input type="text" id="recoveryUsername" placeholder="usuario">
+            </div>
+            <div class="form-group">
+                <label for="recoveryEmail">Email</label>
+                <input type="email" id="recoveryEmail" placeholder="email@ejemplo.com">
+            </div>
+            <div id="newPasswordSection" style="display:none;">
+                <div class="form-group">
+                    <label for="newPassword">Nueva Contraseña</label>
+                    <input type="password" id="newPassword" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmar Contraseña</label>
+                    <input type="password" id="confirmPassword" placeholder="••••••••">
+                </div>
+                <button class="btn" onclick="resetPassword()">Restablecer Contraseña</button>
+            </div>
+            <button class="btn" onclick="verifyUser()" id="verifyBtn">Verificar Usuario</button>
+            <button class="btn btn-secondary" onclick="showLogin()">Volver al Login</button>
+        </div>
+
+        <!-- Pantalla Principal -->
+        <div id="mainScreen" class="screen">
+            <div class="header-nav">
+                <div class="user-info"><span id="currentUser"></span></div>
+                <button class="btn btn-secondary" onclick="logout()">Salir</button>
+            </div>
+            <h1>Panel</h1>
+            <button class="btn" onclick="startTest()">Nuevo Test</button>
+            <button class="btn btn-secondary" onclick="showHistory()">Historial</button>
+        </div>
+
+        <!-- Pantalla de Test -->
+        <div id="testScreen" class="screen">
+            <div class="header-nav">
+                <div class="user-info">👤 <span id="testUser"></span></div>
+                <button class="btn btn-secondary" onclick="exitTest()">⬅ Salir del Test</button>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <div id="questionContainer"></div>
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="previousQuestion()" id="prevBtn">⬅ Anterior</button>
+                <button class="btn" onclick="nextQuestion()" id="nextBtn">Siguiente ➡</button>
+                <button class="btn btn-success" onclick="finishTest()" id="finishBtn" style="display:none;">✅ Finalizar</button>
+            </div>
+        </div>
+
+        <!-- Pantalla de Resultados -->
+        <div id="resultsScreen" class="screen">
+            <div class="header-nav">
+                <div class="user-info"><span id="resultsUser"></span></div>
+            </div>
+            <h1>Resultados</h1>
+            <div class="result-score" id="finalScore"></div>
+            <div id="resultsSummary"></div>
+            <button class="btn" onclick="reviewAnswers()">Revisar Respuestas</button>
+            <button class="btn btn-secondary" onclick="exportToPDF()">Exportar PDF</button>
+            <button class="btn btn-secondary" onclick="backToMain()">Volver</button>
+        </div>
+
+        <!-- Pantalla de Revisión -->
+        <div id="reviewScreen" class="screen">
+            <div class="header-nav">
+                <div class="user-info"><span id="reviewUser"></span></div>
+            </div>
+            <h1>Revisión</h1>
+            <div id="reviewContainer"></div>
+            <button class="btn btn-secondary" onclick="backToResults()">Volver</button>
+        </div>
+
+        <!-- Pantalla de Historial -->
+        <div id="historyScreen" class="screen">
+            <div class="header-nav">
+                <div class="user-info"><span id="historyUser"></span></div>
+            </div>
+            <h1>Historial</h1>
+            <div id="historyContainer"></div>
+            <button class="btn btn-secondary" onclick="backToMain()">Volver</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // Base de datos de preguntas PMP
+        const questionBank = [
+            {
+                question: "¿Cuál es el proceso de inicio de un proyecto según el PMBOK?",
+                options: [
+                    "Desarrollar el plan de gestión del proyecto",
+                    "Desarrollar el acta de constitución del proyecto",
+                    "Identificar a los interesados",
+                    "Definir el alcance del proyecto"
+                ],
+                correct: 1,
+                explanation: "El Acta de Constitución del Proyecto es el documento que autoriza formalmente la existencia del proyecto y proporciona al director del proyecto la autoridad para aplicar recursos de la organización a las actividades del proyecto."
+            },
+            {
+                question: "¿Qué técnica se utiliza para identificar la causa raíz de un problema?",
+                options: [
+                    "Análisis FODA",
+                    "Diagrama de Gantt",
+                    "Diagrama de Ishikawa (espina de pescado)",
+                    "Matriz RACI"
+                ],
+                correct: 2,
+                explanation: "El Diagrama de Ishikawa, también conocido como diagrama de espina de pescado o causa-efecto, es una herramienta que ayuda a identificar, explorar y representar gráficamente las causas principales y secundarias de un problema."
+            },
+            {
+                question: "¿Qué es el índice de desempeño del costo (CPI)?",
+                options: [
+                    "Costo planificado / Costo real",
+                    "Valor ganado / Costo real",
+                    "Valor ganado / Valor planificado",
+                    "Costo estimado / Costo presupuestado"
+                ],
+                correct: 1,
+                explanation: "El CPI (Cost Performance Index) se calcula como EV/AC (Valor Ganado/Costo Real). Un CPI mayor a 1 indica que el proyecto está bajo presupuesto, mientras que menor a 1 indica sobrecosto."
+            },
+            {
+                question: "¿Cuál es el propósito principal de la gestión de riesgos?",
+                options: [
+                    "Eliminar todos los riesgos del proyecto",
+                    "Identificar, analizar y responder a los riesgos del proyecto",
+                    "Crear un plan de contingencia para cada riesgo",
+                    "Evitar que ocurran problemas en el proyecto"
+                ],
+                correct: 1,
+                explanation: "La gestión de riesgos busca identificar, analizar y desarrollar respuestas apropiadas a los riesgos del proyecto. No se trata de eliminar todos los riesgos, sino de gestionarlos adecuadamente."
+            },
+            {
+                question: "¿Qué es un hito en la gestión de proyectos?",
+                options: [
+                    "Una tarea crítica del proyecto",
+                    "Un punto significativo o evento en el cronograma con duración cero",
+                    "Una reunión de seguimiento del proyecto",
+                    "Un entregable del proyecto"
+                ],
+                correct: 1,
+                explanation: "Un hito es un punto o evento significativo en el proyecto que tiene duración cero. Se utiliza para marcar puntos de control importantes o la finalización de entregas clave."
+            },
+            {
+                question: "¿Qué herramienta se utiliza para mostrar la secuencia de actividades en un proyecto?",
+                options: [
+                    "Diagrama de Gantt",
+                    "Diagrama de red del cronograma",
+                    "Estructura de desglose del trabajo (EDT/WBS)",
+                    "Registro de riesgos"
+                ],
+                correct: 1,
+                explanation: "El diagrama de red del cronograma muestra las relaciones lógicas entre las actividades del proyecto. El diagrama de Gantt muestra las actividades en el tiempo, pero el diagrama de red es específico para mostrar dependencias."
+            },
+            {
+                question: "¿Qué es el alcance del proyecto?",
+                options: [
+                    "El tiempo que tomará completar el proyecto",
+                    "El trabajo que debe realizarse para entregar un producto con las características especificadas",
+                    "El presupuesto del proyecto",
+                    "Los recursos necesarios para el proyecto"
+                ],
+                correct: 1,
+                explanation: "El alcance del proyecto describe el trabajo que debe realizarse para entregar un producto, servicio o resultado con las características y funciones especificadas."
+            },
+            {
+                question: "¿Cuál es el rol principal del patrocinador del proyecto?",
+                options: [
+                    "Gestionar el equipo del proyecto",
+                    "Proporcionar apoyo financiero y político al proyecto",
+                    "Desarrollar el cronograma del proyecto",
+                    "Ejecutar las actividades del proyecto"
+                ],
+                correct: 1,
+                explanation: "El patrocinador proporciona recursos financieros y apoyo político, además de autoridad para el proyecto. Es quien autoriza el acta de constitución del proyecto."
+            },
+            {
+                question: "¿Qué técnica se utiliza para comprimir el cronograma sin cambiar el alcance?",
+                options: [
+                    "Fast tracking (ejecución rápida)",
+                    "Reducción del alcance",
+                    "Incremento de recursos",
+                    "Replanificación completa"
+                ],
+                correct: 0,
+                explanation: "Fast tracking es realizar actividades en paralelo que originalmente estaban planificadas en secuencia. Crashing también comprime el cronograma agregando recursos, pero fast tracking es la técnica más directa sin necesariamente cambiar recursos."
+            },
+            {
+                question: "¿Qué es la línea base del alcance?",
+                options: [
+                    "El cronograma inicial del proyecto",
+                    "EDT/WBS, diccionario de la EDT y declaración del alcance aprobados",
+                    "El presupuesto inicial del proyecto",
+                    "La lista de requisitos del proyecto"
+                ],
+                correct: 1,
+                explanation: "La línea base del alcance incluye la declaración del alcance del proyecto, la EDT/WBS y el diccionario de la EDT. Es la versión aprobada que se utiliza como base para la comparación."
+            },
+            {
+                question: "¿Qué es un cambio de control integrado?",
+                options: [
+                    "Un proceso para gestionar solo cambios de alcance",
+                    "Un proceso para revisar, aprobar y gestionar todos los cambios al proyecto",
+                    "Una reunión semanal de seguimiento",
+                    "Un documento de requisitos"
+                ],
+                correct: 1,
+                explanation: "El control integrado de cambios es el proceso de revisar todas las solicitudes de cambio, aprobar los cambios y gestionar los cambios a los entregables, documentos y plan del proyecto."
+            },
+            {
+                question: "¿Cuál es la ruta crítica en un proyecto?",
+                options: [
+                    "Las actividades más importantes del proyecto",
+                    "La secuencia de actividades que determina la duración más corta del proyecto",
+                    "Las actividades con mayor riesgo",
+                    "Las actividades asignadas al director del proyecto"
+                ],
+                correct: 1,
+                explanation: "La ruta crítica es la secuencia de actividades con mayor duración que determina la duración total del proyecto. Las actividades en esta ruta tienen holgura cero."
+            },
+            {
+                question: "¿Qué es la gestión de valor ganado (EVM)?",
+                options: [
+                    "Una técnica para calcular salarios",
+                    "Una metodología que integra alcance, cronograma y recursos para medir el desempeño del proyecto",
+                    "Un método para negociar contratos",
+                    "Una herramienta de gestión de riesgos"
+                ],
+                correct: 1,
+                explanation: "EVM (Earned Value Management) es una metodología que integra mediciones de alcance, cronograma y costos para evaluar el desempeño y progreso del proyecto."
+            },
+            {
+                question: "¿Qué matriz se utiliza para asignar responsabilidades en el proyecto?",
+                options: [
+                    "Matriz de riesgos",
+                    "Matriz RACI",
+                    "Matriz de trazabilidad de requisitos",
+                    "Matriz de probabilidad e impacto"
+                ],
+                correct: 1,
+                explanation: "La matriz RACI (Responsible, Accountable, Consulted, Informed) define claramente los roles y responsabilidades de los miembros del equipo para cada actividad del proyecto."
+            },
+            {
+                question: "¿Cuál es el objetivo del cierre del proyecto?",
+                options: [
+                    "Despedir al equipo del proyecto",
+                    "Finalizar formalmente todas las actividades y documentar lecciones aprendidas",
+                    "Entregar el producto final",
+                    "Celebrar el éxito del proyecto"
+                ],
+                correct: 1,
+                explanation: "El cierre del proyecto incluye finalizar todas las actividades, obtener aceptación formal, documentar lecciones aprendidas y liberar recursos del proyecto."
+            },
+            {
+                question: "¿Qué es un registro de interesados?",
+                options: [
+                    "Una lista de empleados de la empresa",
+                    "Un documento que identifica a las personas u organizaciones impactadas por el proyecto",
+                    "Una agenda de reuniones",
+                    "Un directorio telefónico"
+                ],
+                correct: 1,
+                explanation: "El registro de interesados documenta información sobre los interesados del proyecto, incluyendo su nivel de influencia, intereses, expectativas y nivel de participación en el proyecto."
+            },
+            {
+                question: "¿Qué técnica se utiliza para estimar la duración de las actividades basándose en tres escenarios?",
+                options: [
+                    "Estimación análoga",
+                    "Estimación paramétrica",
+                    "Estimación PERT (tres puntos)",
+                    "Estimación bottom-up"
+                ],
+                correct: 2,
+                explanation: "La estimación PERT usa tres valores: optimista, más probable y pesimista. La fórmula es (O + 4M + P) / 6, donde O=optimista, M=más probable, P=pesimista."
+            },
+            {
+                question: "¿Qué es el triángulo de la triple restricción?",
+                options: [
+                    "Tiempo, costo y calidad",
+                    "Alcance, cronograma y costo",
+                    "Riesgo, recursos y tiempo",
+                    "Planificación, ejecución y control"
+                ],
+                correct: 1,
+                explanation: "El triángulo de la triple restricción (o triple restricción del proyecto) incluye alcance, tiempo y costo. Estos tres elementos están interrelacionados y cambios en uno afectan a los otros."
+            },
+            {
+                question: "¿Cuál es el propósito de una reunión de retrospectiva?",
+                options: [
+                    "Planificar las actividades futuras",
+                    "Revisar lo que funcionó bien y lo que puede mejorarse",
+                    "Asignar tareas al equipo",
+                    "Presentar resultados al cliente"
+                ],
+                correct: 1,
+                explanation: "Las reuniones de retrospectiva permiten al equipo reflexionar sobre el proceso, identificar lo que funcionó bien, lo que no funcionó y definir acciones de mejora continua."
+            },
+            {
+                question: "¿Qué es un paquete de trabajo en la EDT/WBS?",
+                options: [
+                    "Un grupo de proyectos relacionados",
+                    "El nivel más bajo de la EDT donde se puede estimar y gestionar el trabajo",
+                    "Un documento de requisitos",
+                    "Una fase del proyecto"
+                ],
+                correct: 1,
+                explanation: "Un paquete de trabajo es el nivel más bajo de la EDT. Es un entregable o componente del trabajo del proyecto donde se puede estimar el costo y la duración, y se puede programar, costear y supervisar."
+            },
+            {
+                question: "¿Qué tipo de contrato transfiere más riesgo al vendedor?",
+                options: [
+                    "Contrato de precio fijo (FP)",
+                    "Contrato de costo más honorarios (CPFF)",
+                    "Contrato de tiempo y materiales (T&M)",
+                    "Contrato de costo reembolsable"
+                ],
+                correct: 0,
+                explanation: "En un contrato de precio fijo, el vendedor asume el mayor riesgo porque debe entregar el trabajo acordado por un precio fijo, independientemente de los costos reales."
+            },
+            {
+                question: "¿Qué es la gestión de la configuración?",
+                options: [
+                    "Configurar el software del proyecto",
+                    "Un sistema para identificar, documentar y controlar cambios en los entregables del proyecto",
+                    "Configurar el equipo del proyecto",
+                    "Establecer las reglas del proyecto"
+                ],
+                correct: 1,
+                explanation: "La gestión de la configuración identifica y documenta las características de los entregables del proyecto, controla cambios en estas características y registra el estado de las solicitudes de cambio."
+            },
+            {
+                question: "¿Qué es el análisis de variación?",
+                options: [
+                    "Comparar resultados planificados con resultados reales",
+                    "Analizar diferentes opciones de proyecto",
+                    "Estudiar la diversidad del equipo",
+                    "Evaluar proveedores alternativos"
+                ],
+                correct: 0,
+                explanation: "El análisis de variación compara los resultados planificados (línea base) con los resultados reales para determinar diferencias o variaciones en el desempeño del proyecto."
+            },
+            {
+                question: "¿Cuál es el propósito del plan de gestión de comunicaciones?",
+                options: [
+                    "Instalar sistemas de comunicación",
+                    "Definir cómo se recopilará, almacenará y distribuirá la información del proyecto",
+                    "Entrenar al equipo en habilidades de comunicación",
+                    "Comprar equipos de comunicación"
+                ],
+                correct: 1,
+                explanation: "El plan de gestión de comunicaciones describe cómo se planificarán, estructurarán, monitorearán y controlarán las comunicaciones del proyecto para satisfacer las necesidades de información de los interesados."
+            },
+            {
+                question: "¿Qué es una reserva de contingencia?",
+                options: [
+                    "El presupuesto total del proyecto",
+                    "Tiempo o presupuesto adicional para riesgos conocidos",
+                    "El fondo de emergencia de la empresa",
+                    "El dinero ahorrado en el proyecto"
+                ],
+                correct: 1,
+                explanation: "Las reservas de contingencia son asignaciones de tiempo o presupuesto para riesgos conocidos que han sido identificados en el proceso de gestión de riesgos. Forman parte de la línea base."
+            },
+            {
+                question: "¿Qué técnica utiliza opiniones de expertos para estimar?",
+                options: [
+                    "Método Monte Carlo",
+                    "Técnica Delphi",
+                    "Análisis paramétrico",
+                    "Estimación análoga"
+                ],
+                correct: 1,
+                explanation: "La técnica Delphi es un método de consenso que utiliza un panel de expertos. Los expertos responden cuestionarios en rondas, con retroalimentación anónima entre rondas para alcanzar un consenso."
+            },
+            {
+                question: "¿Qué es el análisis de hacer o comprar?",
+                options: [
+                    "Decidir si continuar o cancelar el proyecto",
+                    "Determinar si es mejor producir internamente o adquirir externamente",
+                    "Elegir entre dos proveedores",
+                    "Decidir el presupuesto del proyecto"
+                ],
+                correct: 1,
+                explanation: "El análisis de hacer o comprar (make-or-buy) evalúa si es más beneficioso desarrollar un producto o servicio internamente o adquirirlo de un proveedor externo."
+            },
+            {
+                question: "¿Qué es un supuesto en la gestión de proyectos?",
+                options: [
+                    "Un error de planificación",
+                    "Un factor que se considera verdadero para propósitos de planificación",
+                    "Una meta del proyecto",
+                    "Un riesgo identificado"
+                ],
+                correct: 1,
+                explanation: "Un supuesto es un factor que se considera verdadero, real o cierto para propósitos de planificación del proyecto, aunque no haya sido probado o demostrado. Los supuestos deben documentarse."
+            },
+            {
+                question: "¿Cuál es el propósito del acta de constitución del proyecto?",
+                options: [
+                    "Detallar todas las actividades del proyecto",
+                    "Autorizar formalmente el proyecto y dar autoridad al director del proyecto",
+                    "Listar todos los riesgos del proyecto",
+                    "Definir el presupuesto detallado"
+                ],
+                correct: 1,
+                explanation: "El acta de constitución autoriza formalmente la existencia del proyecto y proporciona al director del proyecto la autoridad para aplicar recursos organizacionales a las actividades del proyecto."
+            },
+            {
+                question: "¿Qué es la descomposición en la gestión de proyectos?",
+                options: [
+                    "Eliminar tareas innecesarias",
+                    "Subdividir los entregables del proyecto en componentes más pequeños y manejables",
+                    "Reducir el equipo del proyecto",
+                    "Cancelar fases del proyecto"
+                ],
+                correct: 1,
+                explanation: "La descomposición es una técnica que subdivide los entregables y el trabajo del proyecto en componentes más pequeños y manejables, creando la estructura de desglose del trabajo (EDT/WBS)."
+            }
+        ];
+
+        // Variables globales
+        let currentUser = null;
+        let currentTest = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let testResults = null;
+        let reviewSource = 'results'; // 'results' o 'history'
+
+        // Funciones de Login Social
+        // Inicialización
+        function init() {
+            // Verificar si hay sesión activa
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainScreen();
+            }
+        }
+
+        // Funciones de navegación
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function showLogin() {
+            showScreen('loginScreen');
+            document.getElementById('loginMessage').innerHTML = '';
+        }
+
+        function showRegister() {
+            showScreen('registerScreen');
+            document.getElementById('registerMessage').innerHTML = '';
+        }
+
+        function showRecovery() {
+            showScreen('recoveryScreen');
+            document.getElementById('recoveryMessage').innerHTML = '';
+            document.getElementById('newPasswordSection').style.display = 'none';
+            document.getElementById('verifyBtn').style.display = 'inline-block';
+            document.getElementById('recoveryUsername').value = '';
+            document.getElementById('recoveryEmail').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+
+        function showMainScreen() {
+            showScreen('mainScreen');
+            document.getElementById('currentUser').textContent = currentUser.username;
+        }
+
+        // Funciones de autenticación
+        function register() {
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+
+            if (!username || !email || !password) {
+                showMessage('registerMessage', 'Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            if (users.find(u => u.username === username)) {
+                showMessage('registerMessage', 'El usuario ya existe', 'error');
+                return;
+            }
+
+            users.push({
+                username: username,
+                email: email,
+                password: password,
+                testHistory: []
+            });
+
+            localStorage.setItem('users', JSON.stringify(users));
+            showMessage('registerMessage', 'Registro exitoso. Inicia sesión ahora.', 'success');
+            
+            setTimeout(() => {
+                showLogin();
+            }, 1500);
+        }
+
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                showMessage('loginMessage', 'Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            // Debug: verificar si hay usuarios registrados
+            if (users.length === 0) {
+                showMessage('loginMessage', 'No hay usuarios registrados. Por favor regístrate primero.', 'error');
+                return;
+            }
+            
+            const user = users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showMainScreen();
+            } else {
+                // Verificar si el usuario existe pero la contraseña es incorrecta
+                const userExists = users.find(u => u.username === username);
+                if (userExists) {
+                    showMessage('loginMessage', '❌ Contraseña incorrecta', 'error');
+                } else {
+                    showMessage('loginMessage', '❌ Usuario no encontrado. ¿Necesitas registrarte?', 'error');
+                }
+            }
+        }
+
+        function verifyUser() {
+            const username = document.getElementById('recoveryUsername').value.trim();
+            const email = document.getElementById('recoveryEmail').value.trim();
+
+            if (!username || !email) {
+                showMessage('recoveryMessage', 'Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.username === username && u.email === email);
+
+            if (user) {
+                showMessage('recoveryMessage', 'Usuario verificado. Crea una nueva contraseña.', 'success');
+                document.getElementById('newPasswordSection').style.display = 'block';
+                document.getElementById('verifyBtn').style.display = 'none';
+            } else {
+                showMessage('recoveryMessage', 'Usuario o email no encontrados.', 'error');
+            }
+        }
+
+        function resetPassword() {
+            const username = document.getElementById('recoveryUsername').value.trim();
+            const email = document.getElementById('recoveryEmail').value.trim();
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!newPassword || !confirmPassword) {
+                showMessage('recoveryMessage', 'Por favor completa ambos campos de contraseña', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showMessage('recoveryMessage', 'Las contraseñas no coinciden', 'error');
+                return;
+            }
+
+            if (newPassword.length < 4) {
+                showMessage('recoveryMessage', 'La contraseña debe tener al menos 4 caracteres', 'error');
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(u => u.username === username && u.email === email);
+
+            if (userIndex !== -1) {
+                users[userIndex].password = newPassword;
+                localStorage.setItem('users', JSON.stringify(users));
+                showMessage('recoveryMessage', 'Contraseña restablecida. Redirigiendo...', 'success');
+                
+                setTimeout(() => {
+                    showLogin();
+                }, 2000);
+            } else {
+                showMessage('recoveryMessage', 'Error al restablecer la contraseña', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            currentTest = null;
+            showLogin();
+        }
+
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="${type}-message">${message}</div>`;
+        }
+
+        // Funciones del test
+        function startTest() {
+            // Seleccionar 20 preguntas aleatorias
+            const shuffled = [...questionBank].sort(() => Math.random() - 0.5);
+            const selectedQuestions = shuffled.slice(0, 20);
+            
+            // Mezclar las opciones de cada pregunta para evitar patrones
+            currentTest = selectedQuestions.map(question => {
+                // Crear array con índices y opciones
+                const optionsWithIndex = question.options.map((opt, idx) => ({
+                    text: opt,
+                    wasCorrect: idx === question.correct
+                }));
+                
+                // Mezclar las opciones
+                const shuffledOptions = [...optionsWithIndex].sort(() => Math.random() - 0.5);
+                
+                // Encontrar el nuevo índice de la respuesta correcta
+                const newCorrectIndex = shuffledOptions.findIndex(opt => opt.wasCorrect);
+                
+                return {
+                    question: question.question,
+                    options: shuffledOptions.map(opt => opt.text),
+                    correct: newCorrectIndex,
+                    explanation: question.explanation
+                };
+            });
+            
+            currentQuestionIndex = 0;
+            userAnswers = new Array(20).fill(null);
+            
+            showScreen('testScreen');
+            document.getElementById('testUser').textContent = currentUser.username;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const question = currentTest[currentQuestionIndex];
+            const container = document.getElementById('questionContainer');
+            
+            let html = `
+                <div class="question-container">
+                    <div class="question-number">Pregunta ${currentQuestionIndex + 1} de 20</div>
+                    <div class="question-text">${question.question}</div>
+            `;
+            
+            question.options.forEach((option, index) => {
+                const isSelected = userAnswers[currentQuestionIndex] === index;
+                const optionId = `option_${currentQuestionIndex}_${index}`;
+                html += `
+                    <div class="answer-option ${isSelected ? 'selected' : ''}" data-index="${index}">
+                        <input type="radio" name="answer_${currentQuestionIndex}" id="${optionId}" value="${index}" ${isSelected ? 'checked' : ''}>
+                        <label for="${optionId}">${option}</label>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            container.innerHTML = html;
+            
+            // Agregar event listeners después de crear el HTML
+            const options = container.querySelectorAll('.answer-option');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    selectAnswer(index);
+                });
+            });
+            
+            updateProgress();
+            updateNavigationButtons();
+        }
+
+        function selectAnswer(answerIndex) {
+            userAnswers[currentQuestionIndex] = answerIndex;
+            displayQuestion();
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / 20) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestionIndex === 0 ? 'none' : 'inline-block';
+            document.getElementById('nextBtn').style.display = currentQuestionIndex === 19 ? 'none' : 'inline-block';
+            document.getElementById('finishBtn').style.display = currentQuestionIndex === 19 ? 'inline-block' : 'none';
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < 19) {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function exitTest() {
+            if (confirm('⚠️ ¿Estás seguro que quieres salir del test?\n\nSe perderá todo el progreso y las respuestas que hayas marcado.\n\nPuedes volver al panel principal y empezar un nuevo test cuando quieras.')) {
+                currentTest = null;
+                userAnswers = [];
+                currentQuestionIndex = 0;
+                showMainScreen();
+            }
+        }
+
+        function finishTest() {
+            if (userAnswers.includes(null)) {
+                if (!confirm('Hay preguntas sin responder. ¿Deseas finalizar de todos modos?')) {
+                    return;
+                }
+            }
+
+            calculateResults();
+            saveTestResults();
+            showResults();
+        }
+
+        function calculateResults() {
+            let correct = 0;
+            let incorrect = 0;
+            let unanswered = 0;
+
+            const details = currentTest.map((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (userAnswer === null) {
+                    unanswered++;
+                    return {
+                        question: question.question,
+                        userAnswer: null,
+                        correctAnswer: question.correct,
+                        isCorrect: false,
+                        explanation: question.explanation,
+                        options: question.options
+                    };
+                } else if (isCorrect) {
+                    correct++;
+                } else {
+                    incorrect++;
+                }
+
+                return {
+                    question: question.question,
+                    userAnswer: userAnswer,
+                    correctAnswer: question.correct,
+                    isCorrect: isCorrect,
+                    explanation: question.explanation,
+                    options: question.options
+                };
+            });
+
+            testResults = {
+                date: new Date().toISOString(),
+                correct: correct,
+                incorrect: incorrect,
+                unanswered: unanswered,
+                score: ((correct / 20) * 100).toFixed(1),
+                details: details
+            };
+        }
+
+        function saveTestResults() {
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(u => u.username === currentUser.username);
+            
+            if (userIndex !== -1) {
+                if (!users[userIndex].testHistory) {
+                    users[userIndex].testHistory = [];
+                }
+                users[userIndex].testHistory.push(testResults);
+                localStorage.setItem('users', JSON.stringify(users));
+                currentUser = users[userIndex];
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+        }
+
+        function showResults() {
+            showScreen('resultsScreen');
+            document.getElementById('resultsUser').textContent = currentUser.username;
+            
+            const score = testResults.score;
+            let scoreColor = '#1a1a1a';
+            
+            document.getElementById('finalScore').innerHTML = `
+                <div style="color: ${scoreColor};">${score}%</div>
+            `;
+
+            document.getElementById('resultsSummary').innerHTML = `
+                <div class="result-card">
+                    <h3>Resumen</h3>
+                    <p><strong>Correctas:</strong> ${testResults.correct}/20</p>
+                    <p><strong>Incorrectas:</strong> ${testResults.incorrect}/20</p>
+                    <p><strong>Sin responder:</strong> ${testResults.unanswered}/20</p>
+                    <p><strong>Fecha:</strong> ${new Date(testResults.date).toLocaleString('es-ES')}</p>
+                </div>
+            `;
+        }
+
+        function reviewAnswers() {
+            reviewSource = 'results';
+            showScreen('reviewScreen');
+            document.getElementById('reviewUser').textContent = currentUser.username;
+            
+            let html = '';
+            testResults.details.forEach((detail, index) => {
+                const questionNumber = index + 1;
+                let statusColor = detail.isCorrect ? '#00c853' : '#ff1744';
+                let statusText = detail.isCorrect ? 'Correcta' : 'Incorrecta';
+                
+                if (detail.userAnswer === null) {
+                    statusColor = '#ffc107';
+                    statusText = 'Sin responder';
+                }
+
+                html += `
+                    <div class="review-answer">
+                        <h3 style="color: ${statusColor};">Pregunta ${questionNumber} — ${statusText}</h3>
+                        <p><strong>${detail.question}</strong></p>
+                        <div style="margin: 15px 0;">
+                `;
+
+                detail.options.forEach((option, optIndex) => {
+                    let className = '';
+                    let prefix = '';
+                    
+                    if (optIndex === detail.correctAnswer) {
+                        className = 'correct';
+                        prefix = '✓ ';
+                    } else if (optIndex === detail.userAnswer && !detail.isCorrect) {
+                        className = 'incorrect';
+                        prefix = '✗ ';
+                    }
+
+                    html += `
+                        <div class="answer-option ${className}">
+                            ${prefix}${option}
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                        <div class="explanation">
+                            <strong>Explicación:</strong> ${detail.explanation}
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('reviewContainer').innerHTML = html;
+        }
+
+        function backToResults() {
+            if (reviewSource === 'history') {
+                showHistory();
+            } else {
+                showResults();
+            }
+        }
+
+        function showHistory() {
+            showScreen('historyScreen');
+            document.getElementById('historyUser').textContent = currentUser.username;
+            
+            if (!currentUser.testHistory || currentUser.testHistory.length === 0) {
+                document.getElementById('historyContainer').innerHTML = `
+                    <div class="result-card">
+                        <p>No hay tests realizados. Comienza tu primer test.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Fecha</th>
+                            <th>Puntuación</th>
+                            <th>Correctas</th>
+                            <th>Incorrectas</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            currentUser.testHistory.forEach((test, index) => {
+                const date = new Date(test.date).toLocaleString('es-ES');
+                let scoreColor = '#dc3545';
+                
+                if (test.score >= 80) {
+                    scoreColor = '#28a745';
+                } else if (test.score >= 60) {
+                    scoreColor = '#ffc107';
+                }
+
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${date}</td>
+                        <td style="color: ${scoreColor}; font-weight: bold;">${test.score}%</td>
+                        <td>${test.correct}/20</td>
+                        <td>${test.incorrect}/20</td>
+                        <td>
+                            <button class="btn btn-success" onclick="reviewHistoricalTest(${index})" style="padding: 8px 16px; font-size: 13px;">
+                                📋 Ver Detalles
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('historyContainer').innerHTML = html;
+        }
+
+        function backToMain() {
+            showMainScreen();
+        }
+
+        function reviewHistoricalTest(testIndex) {
+            // Cargar el test del historial
+            reviewSource = 'history';
+            testResults = currentUser.testHistory[testIndex];
+            
+            // Mostrar la revisión
+            showScreen('reviewScreen');
+            document.getElementById('reviewUser').textContent = currentUser.username;
+            
+            let html = `
+                <div class="result-card" style="margin-bottom: 30px;">
+                    <h3>📊 Resumen del Test</h3>
+                    <p><strong>Fecha:</strong> ${new Date(testResults.date).toLocaleString('es-ES')}</p>
+                    <p><strong>Puntuación:</strong> ${testResults.score}%</p>
+                    <p><strong>✅ Correctas:</strong> ${testResults.correct}/20</p>
+                    <p><strong>❌ Incorrectas:</strong> ${testResults.incorrect}/20</p>
+                    <p><strong>⚠️ Sin responder:</strong> ${testResults.unanswered}/20</p>
+                </div>
+            `;
+            
+            testResults.details.forEach((detail, index) => {
+                const questionNumber = index + 1;
+                let statusColor = detail.isCorrect ? '#28a745' : '#dc3545';
+                let statusText = detail.isCorrect ? '✅ Correcta' : '❌ Incorrecta';
+                
+                if (detail.userAnswer === null) {
+                    statusColor = '#ffc107';
+                    statusText = '⚠️ Sin responder';
+                }
+
+                html += `
+                    <div class="review-answer">
+                        <h3 style="color: ${statusColor};">Pregunta ${questionNumber} - ${statusText}</h3>
+                        <p><strong>${detail.question}</strong></p>
+                        <div style="margin: 15px 0;">
+                `;
+
+                detail.options.forEach((option, optIndex) => {
+                    let className = '';
+                    let prefix = '';
+                    
+                    if (optIndex === detail.correctAnswer) {
+                        className = 'correct';
+                        prefix = '✅ ';
+                    } else if (optIndex === detail.userAnswer && !detail.isCorrect) {
+                        className = 'incorrect';
+                        prefix = '❌ ';
+                    }
+
+                    html += `
+                        <div class="answer-option ${className}">
+                            ${prefix}${option}
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                        <div class="explanation">
+                            <strong>💡 Explicación:</strong> ${detail.explanation}
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('reviewContainer').innerHTML = html;
+        }
+
+        function backToHistory() {
+            showHistory();
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            let yPos = 20;
+            
+            // Título
+            doc.setFontSize(18);
+            doc.setTextColor(26, 26, 26);
+            doc.text('Resultados Test PMP', 105, yPos, { align: 'center' });
+            
+            yPos += 15;
+            
+            // Información del usuario y fecha
+            doc.setFontSize(11);
+            doc.setTextColor(102, 102, 102);
+            doc.text(`Usuario: ${currentUser.username}`, 20, yPos);
+            yPos += 7;
+            doc.text(`Fecha: ${new Date(testResults.date).toLocaleString('es-ES')}`, 20, yPos);
+            
+            yPos += 15;
+            
+            // Resultados
+            doc.setFontSize(12);
+            doc.setTextColor(26, 26, 26);
+            doc.text('Resumen', 20, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(26, 26, 26);
+            doc.text(`Puntuacion: ${testResults.score}%`, 20, yPos);
+            yPos += 6;
+            doc.text(`Correctas: ${testResults.correct}/20`, 20, yPos);
+            yPos += 6;
+            doc.text(`Incorrectas: ${testResults.incorrect}/20`, 20, yPos);
+            yPos += 6;
+            doc.text(`Sin responder: ${testResults.unanswered}/20`, 20, yPos);
+            
+            yPos += 15;
+            
+            // Detalle de respuestas
+            doc.setFontSize(12);
+            doc.text('Detalle', 20, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(9);
+            
+            testResults.details.forEach((detail, index) => {
+                if (yPos > 270) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                // Pregunta
+                doc.setTextColor(26, 26, 26);
+                doc.setFont(undefined, 'bold');
+                const questionText = `${index + 1}. ${detail.question}`;
+                const questionLines = doc.splitTextToSize(questionText, 170);
+                doc.text(questionLines, 20, yPos);
+                yPos += questionLines.length * 5 + 3;
+                
+                // Respuesta del usuario
+                doc.setFont(undefined, 'normal');
+                if (detail.userAnswer !== null) {
+                    const userAnswerText = `Tu respuesta: ${detail.options[detail.userAnswer]}`;
+                    const userAnswerLines = doc.splitTextToSize(userAnswerText, 170);
+                    
+                    if (detail.isCorrect) {
+                        doc.setTextColor(0, 200, 83);
+                    } else {
+                        doc.setTextColor(255, 23, 68);
+                    }
+                    
+                    doc.text(userAnswerLines, 25, yPos);
+                    yPos += userAnswerLines.length * 5 + 3;
+                } else {
+                    doc.setTextColor(255, 193, 7);
+                    doc.text('Sin responder', 25, yPos);
+                    yPos += 8;
+                }
+                
+                // Respuesta correcta
+                doc.setTextColor(0, 200, 83);
+                const correctText = `Correcta: ${detail.options[detail.correctAnswer]}`;
+                const correctLines = doc.splitTextToSize(correctText, 170);
+                doc.text(correctLines, 25, yPos);
+                yPos += correctLines.length * 5 + 5;
+                
+                yPos += 8;
+            });
+            
+            // Guardar PDF
+            const fileName = `pmp-test-${currentUser.username}-${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+        }
+
+        // Inicializar la aplicación
+        window.onload = init;
+
+        // Atajo de teclado: ESC para salir del test
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const testScreen = document.getElementById('testScreen');
+                if (testScreen && testScreen.classList.contains('active')) {
+                    exitTest();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
